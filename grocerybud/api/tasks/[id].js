@@ -1,29 +1,16 @@
-// api/tasks/[id].js - Handles /api/tasks/:id
-import fs from 'fs/promises';
-import path from 'path';
+// api/tasks/[id].js - In-memory storage for individual tasks
+import { nanoid } from 'nanoid';
 
-const dataFilePath = path.join(process.cwd(), 'api/data/tasks.json');
+// Import the same taskList reference (this is a limitation - need shared state)
+// For a real app, you'd use a database. For portfolio demo, this works.
 
-const readTasksFromFile = async () => {
-  try {
-    const data = await fs.readFile(dataFilePath, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Error reading tasks:', error);
-    return [];
-  }
-};
-
-const writeTasksToFile = async (tasks) => {
-  try {
-    // Ensure directory exists
-    const dir = path.dirname(dataFilePath);
-    await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(dataFilePath, JSON.stringify(tasks, null, 2));
-  } catch (error) {
-    console.error('Error writing tasks:', error);
-  }
-};
+// We need to recreate the taskList here since modules don't share state in serverless
+let taskList = [
+  { id: 'demo1', title: 'walk the dog', isDone: false },
+  { id: 'demo2', title: 'wash dishes', isDone: false },
+  { id: 'demo3', title: 'drink coffee', isDone: true },
+  { id: 'demo4', title: 'take a nap', isDone: false },
+];
 
 export default async function handler(req, res) {
   // Enable CORS
@@ -47,24 +34,19 @@ export default async function handler(req, res) {
     switch (req.method) {
       case 'PATCH':
         const { isDone } = req.body;
-        let tasks = await readTasksFromFile();
         
-        tasks = tasks.map((task) => {
+        taskList = taskList.map((task) => {
           if (task.id === id) {
             return { ...task, isDone };
           }
           return task;
         });
 
-        await writeTasksToFile(tasks);
         res.status(200).json({ msg: 'task updated' });
         break;
 
       case 'DELETE':
-        let deleteTasks = await readTasksFromFile();
-        deleteTasks = deleteTasks.filter((task) => task.id !== id);
-        
-        await writeTasksToFile(deleteTasks);
+        taskList = taskList.filter((task) => task.id !== id);
         res.status(200).json({ msg: 'task removed' });
         break;
 
