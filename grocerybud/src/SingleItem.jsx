@@ -5,26 +5,26 @@ const SingleItem = ({ item }) => { // Remove removeItem prop - not used
   const queryClient = useQueryClient();
 
   const {mutate: editTask} = useMutation({
-    mutationFn: ({id,isDone}) =>customFetch.patch(`/${id}`, {isDone}),
-    onSuccess: () => {
-      console.log('✅ Task updated, invalidating cache...');
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-    },
-    onError: (error) => {
-      console.error('Error updating item:', error);
-    }
-  })
+  mutationFn: ({id, isDone}) => customFetch.patch(`/?id=${id}`, {isDone}), // Add ?id= 
+  onSuccess: () => {
+    console.log('✅ Task updated, invalidating cache...');
+    queryClient.invalidateQueries({ queryKey: ['tasks'] });
+  },
+  onError: (error) => {
+    console.error('Error updating item:', error);
+  }
+})
 
-  const {mutate: removeTask} = useMutation({
-    mutationFn: (id) => customFetch.delete(`/${id}`),
-    onSuccess: () => {
-      console.log('✅ Task deleted, invalidating cache...');
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-    },
-    onError: (error) => {
-      console.error('Error deleting item:', error);
-    }
-  })
+const {mutate: removeTask} = useMutation({
+  mutationFn: (id) => customFetch.delete(`/?id=${id}`), // Add ?id=
+  onSuccess: () => {
+    console.log('✅ Task deleted, invalidating cache...');
+    queryClient.invalidateQueries({ queryKey: ['tasks'] });
+  },
+  onError: (error) => {
+    console.error('Error deleting item:', error);
+  }
+})
 
   return (
     <div className='single-item'>

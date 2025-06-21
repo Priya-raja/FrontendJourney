@@ -1,7 +1,7 @@
-// api/tasks.js - In-memory storage for Vercel
+// api/tasks.js - Single API file for all operations
 import { nanoid } from 'nanoid';
 
-// In-memory storage (resets on deployment)
+// In-memory storage (shared across all operations in this file)
 let taskList = [
   { id: nanoid(), title: 'walk the dog', isDone: false },
   { id: nanoid(), title: 'wash dishes', isDone: false },
@@ -21,8 +21,11 @@ export default async function handler(req, res) {
   }
 
   try {
+    const { id } = req.query; // Get ID from query params
+
     switch (req.method) {
       case 'GET':
+        console.log('📋 Current taskList:', taskList);
         res.status(200).json({ taskList });
         break;
 
@@ -36,11 +39,46 @@ export default async function handler(req, res) {
         const newTask = { id: nanoid(), title, isDone: false };
         taskList = [...taskList, newTask];
         
+        console.log('✅ Task added. New taskList:', taskList);
         res.status(201).json({ task: newTask });
         break;
 
+      case 'PATCH':
+        if (!id) {
+          res.status(400).json({ msg: 'Task ID required for PATCH' });
+          return;
+        }
+        
+        const { isDone } = req.body;
+        console.log(`🔄 Updating task ${id} to isDone: ${isDone}`);
+        
+        taskList = taskList.map((task) => {
+          if (task.id === id) {
+            return { ...task, isDone };
+          }
+          return task;
+        });
+
+        console.log('✅ Task updated. New taskList:', taskList);
+        res.status(200).json({ msg: 'task updated' });
+        break;
+
+      case 'DELETE':
+        if (!id) {
+          res.status(400).json({ msg: 'Task ID required for DELETE' });
+          return;
+        }
+        
+        console.log(`🗑️ Deleting task ${id}`);
+        const initialLength = taskList.length;
+        taskList = taskList.filter((task) => task.id !== id);
+        
+        console.log(`✅ Task deleted. Removed ${initialLength - taskList.length} items. New taskList:`, taskList);
+        res.status(200).json({ msg: 'task removed' });
+        break;
+
       default:
-        res.setHeader('Allow', ['GET', 'POST']);
+        res.setHeader('Allow', ['GET', 'POST', 'PATCH', 'DELETE']);
         res.status(405).end(`Method ${req.method} Not Allowed`);
     }
   } catch (error) {
