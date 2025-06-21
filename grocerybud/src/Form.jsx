@@ -10,11 +10,15 @@ const Form = () => {
 
   const {mutate: createTask, isPending}= useMutation({
     mutationFn: (taskTitle) => customFetch.post('/', {title: taskTitle}),
+
     onSuccess: (data) => {
-      queryClient.invalidateQueries({queryKey: ['tasks']});
-      setNewItemName('');
-      toast.success('task created successfully');
-    },
+  console.log('✅ Task created, invalidating cache...');
+  queryClient.invalidateQueries({queryKey: ['tasks']});
+  console.log('🔄 Cache invalidated');
+  setNewItemName('');
+  toast.success('task created successfully');
+},
+    
     onError: (error) => {
       toast.error(error.response.data.msg || 'something went wrong');
     }
