@@ -1,15 +1,29 @@
 import SingleItem from './SingleItem';
+import {useQuery} from '@tanstack/react-query'
+import customFetch from './utils'
 
-const Items = ({ items, removeItem, editItem }) => {
+const Items = ({ removeItem, editItem }) => {
+
+  const {isPending,isError, data} = useQuery({
+    queryKey:['tasks'], 
+    queryFn: async () => await customFetch.get('/')
+  })
+if (isPending) return <div>Loading...</div>;
+  if (isError) return <div>Error loading tasks</div>;
+
+  // Use the fetched data
+  
+
+  console.log(data)
   return (
     <div className='items'>
-      {items.map((item) => {
+      {data.data.taskList.map((item) => {
         return (
           <SingleItem
             key={item.id}
             item={item}
             removeItem={removeItem}
-            editItem={editItem}
+            
           />
         );
       })}

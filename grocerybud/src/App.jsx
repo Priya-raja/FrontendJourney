@@ -4,6 +4,8 @@ import { nanoid } from 'nanoid';
 import Items from './Items';
 import toast, { Toaster } from 'react-hot-toast';
 
+
+
 const getLocalStorage = () => {
   try {
     const list = localStorage.getItem('list');
