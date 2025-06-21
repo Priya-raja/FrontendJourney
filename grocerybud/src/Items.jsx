@@ -23,19 +23,19 @@ if (isPending) return <div>Loading...</div>;
   
 
   console.log(data)
-  return (
-    <div className='items'>
-      {data.data.taskList.map((item) => {
-        return (
-          <SingleItem
-            key={item.id}
-            item={item}
-            removeItem={removeItem}
-            
-          />
-        );
-      })}
-    </div>
-  );
+ return (
+  <div className='items'>
+    <p>Total tasks: {data?.data?.taskList?.length}</p>
+    {data.data.taskList.map((item) => {
+      return (
+        <SingleItem
+          key={item.id}
+          item={item}
+          // No props needed - SingleItem handles its own mutations
+        />
+      );
+    })}
+  </div>
+);
 };
 export default Items;
